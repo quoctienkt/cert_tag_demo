@@ -1226,16 +1226,29 @@ var (
 )
 
 func main() {
-	flag.Parse()
-	args := flag.Args()
-	if len(args) != 1 {
-		fmt.Fprintf(os.Stderr, "Usage: %s [flags] binary.exe\n", os.Args[0])
-		os.Exit(255)
-	}
-	inFilename := args[0]
-	if len(*outFilename) == 0 {
-		outFilename = &inFilename
-	}
+	// flag.Parse()
+	// args := flag.Args()
+
+	var superfluousCertTag = "Gact2.0Omaha"
+	var inputFile = "sw.exe"
+	var outputFile = "sw-tag.exe"
+	var paddedLength = 8206
+	var dumpAppendedTag = "true"
+	var printTagDetails = "true"
+	var loadAppendedTag = "tenant_name.txt"
+	// if len(args) != 1 {
+	// 	fmt.Fprintf(os.Stderr, "Usage: %s [flags] binary.exe\n", os.Args[0])
+	// 	os.Exit(255)
+	// }
+	// inFilename := args[0]
+
+	var inFilename = inputFile
+
+	// if len(*outFilename) == 0 {
+	// 	outFilename = &inFilename
+	// }
+
+	var outFilename = outputFile
 
 	contents, err := ioutil.ReadFile(inFilename)
 	if err != nil {
@@ -1249,24 +1262,24 @@ func main() {
 	}
 
 	var finalContents []byte
-	didSomething := false
+	// didSomething := false
 
 	if len(*savePKCS7) > 0 {
 		if err := ioutil.WriteFile(*savePKCS7, bin.asn1Data(), 0644); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while writing file: %s\n", err)
 			os.Exit(1)
 		}
-		didSomething = true
+		// didSomething = true
 	}
 
-	if *dumpAppendedTag {
+	if dumpAppendedTag == "true" {
 		appendedTag, ok := bin.AppendedTag()
 		if !ok {
 			fmt.Fprintf(os.Stderr, "No appended tag found\n")
 		} else {
 			os.Stdout.WriteString(hex.Dump(appendedTag))
 		}
-		didSomething = true
+		// didSomething = true
 	}
 
 	if *removeAppendedTag {
@@ -1275,16 +1288,16 @@ func main() {
 			fmt.Fprintf(os.Stderr, "Error while removing appended tag: %s\n", err)
 			os.Exit(1)
 		}
-		if err := ioutil.WriteFile(*outFilename, contents, 0644); err != nil {
+		if err := ioutil.WriteFile(outFilename, contents, 0644); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while writing updated file: %s\n", err)
 			os.Exit(1)
 		}
 		finalContents = contents
-		didSomething = true
+		// didSomething = true
 	}
 
-	if len(*loadAppendedTag) > 0 {
-		tagContents, err := ioutil.ReadFile(*loadAppendedTag)
+	if len(loadAppendedTag) > 0 {
+		tagContents, err := ioutil.ReadFile(loadAppendedTag)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error while reading file: %s\n", err)
 			os.Exit(1)
@@ -1294,28 +1307,28 @@ func main() {
 			fmt.Fprintf(os.Stderr, "Error while setting appended tag: %s\n", err)
 			os.Exit(1)
 		}
-		if err := ioutil.WriteFile(*outFilename, contents, 0644); err != nil {
+		if err := ioutil.WriteFile(outFilename, contents, 0644); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while writing updated file: %s\n", err)
 			os.Exit(1)
 		}
 		finalContents = contents
-		didSomething = true
+		// didSomething = true
 	}
 
-	if len(*setSuperfluousCertTag) > 0 {
+	if len(superfluousCertTag) > 0 {
 		var tagContents []byte
 
-		if strings.HasPrefix(*setSuperfluousCertTag, "0x") {
-			tagContents, err = hex.DecodeString((*setSuperfluousCertTag)[2:])
+		if strings.HasPrefix(superfluousCertTag, "0x") {
+			tagContents, err = hex.DecodeString((superfluousCertTag)[2:])
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Failed to parse tag contents from command line: %s\n", err)
 				os.Exit(1)
 			}
 		} else {
-			tagContents = []byte(*setSuperfluousCertTag)
+			tagContents = []byte(superfluousCertTag)
 		}
 
-		for len(tagContents) < *paddedLength {
+		for len(tagContents) < paddedLength {
 			tagContents = append(tagContents, 0)
 		}
 		// print-tag-details only works if the length requires 2 bytes to specify. (The length bytes
@@ -1332,15 +1345,15 @@ func main() {
 			fmt.Fprintf(os.Stderr, "Error while setting superfluous certificate tag: %s\n", err)
 			os.Exit(1)
 		}
-		if err := ioutil.WriteFile(*outFilename, contents, 0644); err != nil {
+		if err := ioutil.WriteFile(outFilename, contents, 0644); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while writing updated file: %s\n", err)
 			os.Exit(1)
 		}
 		finalContents = contents
-		didSomething = true
+		// didSomething = true
 	}
 
-	if *printTagDetails {
+	if printTagDetails == "true" {
 		if finalContents == nil {
 			// Re-read the input, as NewBinary() may modify it.
 			finalContents, err = ioutil.ReadFile(inFilename)
@@ -1354,16 +1367,16 @@ func main() {
 			os.Exit(1)
 		}
 		fmt.Printf("Omaha Tag offset, length: (%d, %d)\n", offset, length)
-		didSomething = true
+		// didSomething = true
 	}
 
-	if !didSomething {
-		// By default, print basic information.
-		appendedTag, ok := bin.AppendedTag()
-		if !ok {
-			fmt.Printf("No appended tag\n")
-		} else {
-			fmt.Printf("Appended tag included, %d bytes\n", len(appendedTag))
-		}
+	// if !didSomething {
+	// By default, print basic information.
+	appendedTag, ok := bin.AppendedTag()
+	if !ok {
+		fmt.Printf("No appended tag\n")
+	} else {
+		fmt.Printf("Appended tag included, %s \n", string(appendedTag[:]))
 	}
+	// }
 }
