@@ -1,1 +1,1 @@
-tenant_name=portaluat.pia.ai
+tenantname=portaluat&username=tien.dang

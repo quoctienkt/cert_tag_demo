@@ -1242,14 +1242,14 @@ func main() {
 	var filename = "sw"
 	var inFilename = filename + ".exe"
 	*outFilename = filename + "_tag.exe"
-	*setSuperfluousCertTag = "0x47616374322e304f6d616861001474656e616e746e616d653d706f7274616c756174"
-	*removeAppendedTag = false
 	*paddedLength = 8260
 	*dumpAppendedTag = true
+	*removeAppendedTag = true
+	*loadAppendedTag = "tenant_name.txt"
+	// *setSuperfluousCertTag = "0x47616374322e304f6d616861001474656e616e746e616d653d706f7274616c756174"
 	*printTagDetails = true
-	// *loadAppendedTag = "pathToTag"
 
-	contents, err := ioutil.ReadFile(inFilename)
+	contents, _ := ioutil.ReadFile(inFilename)
 	bin, err := NewBinary(contents)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)
@@ -1365,9 +1365,10 @@ func main() {
 		didSomething = true
 	}
 
-	if !didSomething {
-	}
-	{
+	if didSomething {
+		contents, _ := ioutil.ReadFile(*outFilename)
+		bin, _ := NewBinary(contents)
+
 		// By default, print basic information.
 		appendedTag, ok := bin.AppendedTag()
 		if !ok {
