@@ -1236,6 +1236,7 @@ func main() {
 	printTagDetails = new(bool)
 
 	// var tag = "tenantname=portaluat&username=tien.dang"
+	// *setSuperfluousCertTag = "0x47616374322e304f6d616861001474656e616e746e616d653d706f7274616c756174"
 	// var tag_byte = []byte(tag)
 	// var tag_length = len(tag)
 	// var magic_bytes = "Gact2.0Omaha"
@@ -1243,14 +1244,18 @@ func main() {
 	var inFilename = filename + ".exe"
 	*outFilename = filename + "_tag.exe"
 	*paddedLength = 8260
-	*dumpAppendedTag = true
-	*removeAppendedTag = true
+	*dumpAppendedTag = false
+	*removeAppendedTag = false
 	*loadAppendedTag = "tenant_name.txt"
-	// *setSuperfluousCertTag = "0x47616374322e304f6d616861001474656e616e746e616d653d706f7274616c756174"
 	*printTagDetails = true
 
-	contents, _ := ioutil.ReadFile(inFilename)
-	bin, err := NewBinary(contents)
+	var bin Binary
+	var err error
+	if *dumpAppendedTag || *removeAppendedTag || len(*loadAppendedTag) > 0 {
+		contents, _ := ioutil.ReadFile(inFilename)
+		bin, err = NewBinary(contents)
+	}
+
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)
 		os.Exit(1)
@@ -1348,7 +1353,7 @@ func main() {
 		didSomething = true
 	}
 
-	if *printTagDetails {
+	if didSomething {
 		if finalContents == nil {
 			// Re-read the input, as NewBinary() may modify it.
 			finalContents, err = ioutil.ReadFile(inFilename)
@@ -1365,7 +1370,7 @@ func main() {
 		didSomething = true
 	}
 
-	if didSomething {
+	if *printTagDetails {
 		contents, _ := ioutil.ReadFile(*outFilename)
 		bin, _ := NewBinary(contents)
 
